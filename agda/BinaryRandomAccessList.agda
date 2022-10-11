@@ -1,3 +1,5 @@
+{-# OPTIONS --allow-unsolved-metas #-}
+
 open import Data.Nat
 open import Data.Unit
 open import Data.Empty
@@ -30,39 +32,15 @@ in Haskell with nested types:
 
 module BinaryRandomAccessList where
 
-  -- 1. Binary random-access lists are built from leaf binary tree.
-
-  module Container where
-
-    data Tree (A : Set) : ℕ → Set where
-      Leaf : A → Tree A 0
-      Node : ∀ {n} → Tree A n → Tree A n → Tree A (suc n)
-
-    toVec : ∀ {A k} → Tree A k → Vec A (2 ^ k)
-    toVec (Leaf x) = [ x ]
-    toVec (Node t₁ t₂) = toVec t₁ ++ toVec t₂ ++ []
-
-    fromVec : ∀ {A} k → Vec A (2 ^ k) → Tree A k
-    fromVec zero (a ∷ []) = Leaf a
-    fromVec (suc k) vs with splitAt (2 ^ k) vs
-    ... | (ls , rs , _ ) with splitAt (2 ^ k) rs
-    ... | (rs , _ , _) = Node (fromVec k ls) (fromVec k rs)
-
-    iso-to-from : ∀ {A k} (t : Tree A k) → fromVec k (toVec t) ≡ t
-    iso-to-from = {!TO BE DONE!}
-
-    iso-from-to : ∀ {A} k (vs : Vec A (2 ^ k)) → toVec (fromVec k vs) ≡ vs
-    iso-from-to = {!TO BE DONE!}
-
-
-  -- 2. Composing `Datastructure` with `Container` to obtain the desired datatype
+  -- Composing 01-binary structure with leaf binary tree
 
   open import Structure.Bin
+  open import Container.LeafBinaryTree
 
   RAL : Set → Set
-  RAL A = DBin Container.Tree
-                Container.toVec Container.fromVec
-                Container.iso-to-from Container.iso-from-to A
+  RAL A = DBin Tree
+               Container.LeafBinaryTree.toVec Container.LeafBinaryTree.fromVec
+               Container.LeafBinaryTree.iso-to-from Container.LeafBinaryTree.iso-from-to A
 
 
   -- TODO: implement all the operations on the datastructure:
