@@ -3,7 +3,7 @@
 open import Data.Nat
 open import Relation.Binary.PropositionalEquality
 
-module Numerical.Bin.Sparse where
+module Numerical.Binary.Sparse where
 
 data Bin : Set where
   ϵ : Bin

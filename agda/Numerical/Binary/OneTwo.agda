@@ -3,7 +3,7 @@
 open import Data.Nat
 open import Relation.Binary.PropositionalEquality hiding ([_])
 
-module Numerical.Bin.OneTwo where
+module Numerical.Binary.OneTwo where
 
 data OneTwo : Set where
   ϵ  : OneTwo
