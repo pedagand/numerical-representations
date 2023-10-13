@@ -9,7 +9,11 @@ import Numerical.Binary
 import Numerical.SkewBinary
 
 -- 2. Container
+-- 2.1 Base 1^k
 import Container.Unary.Singleton
+-- 2.1 Base 2^k
+import Container.Binary.BinomialHeap
+import Container.Binary.LeafBinaryTree
 
 -- open import BinaryRandomAccessList
 -- open import BinomialTree
