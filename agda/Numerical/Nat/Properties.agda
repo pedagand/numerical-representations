@@ -1,5 +1,7 @@
 {-# OPTIONS --allow-unsolved-metas #-}
 
+module Numerical.Nat.Properties where
+
 open import Data.Nat renaming (suc to sucℕ)
 open import Relation.Binary.PropositionalEquality
 
