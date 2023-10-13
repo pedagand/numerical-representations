@@ -1,115 +1,130 @@
 {-# OPTIONS --rewriting #-}
 
+open import Data.Fin hiding (_+_ ; pred)
 open import Data.Nat renaming (suc to sucℕ)
 open import Relation.Binary.PropositionalEquality
 
 open import Numerical.Nat.Properties
 
+import Numerical.Generic.RunLength
+
 {-# BUILTIN REWRITE _≡_ #-}
 
 module Numerical.SkewBinary.SparseCanonical where
 
-    data Mode : Set where
-      I C : Mode
+base : ℕ → ℕ
+base k = 2^[ k +1]-1
 
-    data Skew : Mode → Set where
-      ϵ  : ∀ {m} → Skew m
-      _I[_] : ∀ {m} → Skew I → ℕ → Skew m
-      _T[_] : Skew I → ℕ → Skew C
+data mode : Set where
+  C I : mode
 
-    Skew⇒Nat-g : ∀ {m} → Skew m → ℕ → ℕ
-    Skew⇒Nat-g ϵ k = 0
-    Skew⇒Nat-g (bs I[ c ]) k =
-       {- 1 * -} 2^[ k + c +1]-1
-      + Skew⇒Nat-g bs (1 + k + c)
-    Skew⇒Nat-g (bs T[ c ]) k =
-      {- 2 * 2^[ k +1]-1 = -}
-       2^[ c +1]-1 + 2^[ c +1]-1
-      + Skew⇒Nat-g bs (1 + c)
+op : mode → ℕ
+op m = sucℕ (op2 m)
+  where op2 : mode → ℕ
+        op2 C = 1
+        op2 I = 0
 
-    Skew⇒Nat : Skew C → ℕ
-    Skew⇒Nat bs = Skew⇒Nat-g bs 0
+ar : ∀ {m} → Fin (op m) → ℕ
+ar zero = 0
+ar {C} (suc zero) = 1
 
-    _ : Skew⇒Nat ϵ ≡ 0
-    _ = refl
+nx : ∀ {m} → Fin (op m) → mode
+nx zero = I
+nx {C} (suc zero) = I
 
-    _ : Skew⇒Nat (ϵ I[ 0 ]) ≡ 1
-    _ = refl
+module SkewBinary = Numerical.Generic.RunLength base mode op ar nx
 
-    _ : Skew⇒Nat (ϵ T[ 0 ]) ≡ 2
-    _ = refl
+open SkewBinary
 
-    _ : Skew⇒Nat (ϵ I[ 1 ]) ≡ 3
-    _ = refl
+Skew = Num
+Skew⇒Nat : Skew C → ℕ
+Skew⇒Nat = SkewBinary.toℕ
 
-    _ : Skew⇒Nat (ϵ I[ 0 ] I[ 0 ]) ≡ 4
-    _ = refl
-
-    _ : Skew⇒Nat (ϵ I[ 0 ] T[ 0 ]) ≡ 5
-    _ = refl
-
-    _ : Skew⇒Nat (ϵ T[ 1 ]) ≡ 6
-    _ = refl
-
-    _ : Skew⇒Nat (ϵ I[ 2 ]) ≡ 7
-    _ = refl
-
-    _ : Skew⇒Nat (ϵ I[ 3 ]) ≡ 15
-    _ = refl
-
-    _ : Skew⇒Nat (ϵ I[ 1 ] T[ 2 ]) ≡ 45
-    _ = refl
+pattern _I[_] bs c = C zero c bs
+pattern _T[_] bs c = C (suc zero) c bs
 
 
-    incr : Skew C → Skew C
-    incr ϵ = ϵ I[ 0 ]
-    incr (bs I[ 0 ]) = bs T[ 0 ]
-    incr (bs I[ sucℕ c ]) = bs I[ c ] I[ 0 ]
-    incr (ϵ T[ c ]) = ϵ I[ sucℕ c ]
-    incr (bs I[ zero ] T[ c ]) = bs T[ sucℕ c ]
-    incr (bs I[ sucℕ c₁ ] T[ c ]) = bs I[ c₁ ] I[ sucℕ c ]
+_ : Skew⇒Nat ϵ ≡ 0
+_ = refl
 
-    Nat⇒Skew : ℕ → Skew C
-    Nat⇒Skew zero = ϵ
-    Nat⇒Skew (sucℕ n) = incr (Nat⇒Skew n)
+_ : Skew⇒Nat (ϵ I[ 0 ]) ≡ 1
+_ = refl
 
-    decr : Skew C → Skew C
-    decr ϵ = ϵ
-    decr (ϵ I[ sucℕ c ]) = ϵ T[ c ]
-    decr ((bs I[ c₁ ]) I[ sucℕ c ]) = bs I[ sucℕ c₁ ]  T[ c ]
-    decr (ϵ I[ zero ]) = ϵ
-    decr ((bs I[ c ]) I[ zero ]) = bs I[ sucℕ c ]
-    decr (bs T[ zero ]) = bs I[ zero ]
-    decr (bs T[ sucℕ c ]) = bs I[ 0 ] T[ c ]
+_ : Skew⇒Nat (ϵ T[ 0 ]) ≡ 2
+_ = refl
 
-    rewrite-+0 : ∀ n → n + 0 ≡ n
-    rewrite-+0 zero = refl
-    rewrite-+0 (sucℕ n) rewrite rewrite-+0 n = refl
+_ : Skew⇒Nat (ϵ I[ 1 ]) ≡ 3
+_ = refl
 
-    rewrite-+S : ∀ n m → n + sucℕ m ≡ sucℕ (n + m)
-    rewrite-+S zero m = refl
-    rewrite-+S (sucℕ n) m rewrite rewrite-+S n m = refl
+_ : Skew⇒Nat (ϵ I[ 0 ] I[ 0 ]) ≡ 4
+_ = refl
 
-    rewrite-+-comm : ∀ m n o → m + (n + o) ≡ m + n + o
-    rewrite-+-comm zero n o = refl
-    rewrite-+-comm (sucℕ m) n o rewrite rewrite-+-comm m n o = refl
+_ : Skew⇒Nat (ϵ I[ 0 ] T[ 0 ]) ≡ 5
+_ = refl
 
-    {-# REWRITE rewrite-+0 rewrite-+S rewrite-+-comm #-}
+_ : Skew⇒Nat (ϵ T[ 1 ]) ≡ 6
+_ = refl
 
+_ : Skew⇒Nat (ϵ I[ 2 ]) ≡ 7
+_ = refl
 
-    pf-incr : ∀ s → 1 + (Skew⇒Nat s) ≡ Skew⇒Nat (incr s)
-    pf-incr ϵ = refl
-    pf-incr (bs I[ zero ]) = refl
-    pf-incr (bs I[ sucℕ c ]) = refl
-    pf-incr (ϵ T[ c ]) = refl
-    pf-incr ((bs I[ zero ]) T[ c ]) = refl
-    pf-incr ((bs I[ sucℕ x ]) T[ c ]) = refl
+_ : Skew⇒Nat (ϵ I[ 3 ]) ≡ 15
+_ = refl
 
-    pf-decr : ∀ s → pred (Skew⇒Nat s) ≡ Skew⇒Nat (decr s)
-    pf-decr ϵ = refl
-    pf-decr (ϵ I[ sucℕ c ]) = refl
-    pf-decr ((bs I[ x ]) I[ sucℕ c ]) = refl
-    pf-decr (ϵ I[ zero ]) = refl
-    pf-decr ((bs I[ c ]) I[ zero ]) = refl
-    pf-decr (x T[ zero ]) = refl
-    pf-decr (x T[ sucℕ x₁ ]) = refl
+_ : Skew⇒Nat (ϵ I[ 1 ] T[ 2 ]) ≡ 45
+_ = refl
+
+-- Isomorphism with direct representation:
+
+data Skew-View : ∀ {m} → Skew m → Set where
+  is-ϵ : ∀ {m} → Skew-View {m} ϵ
+  is-_I[_] : ∀ {m} {bs} (n : Skew-View bs) (c : ℕ) →
+          Skew-View {m} (C zero c bs)
+  is-_T[_] : ∀ {bs} (n : Skew-View bs) (c : ℕ) →
+          Skew-View {C} (C (suc zero) c bs)
+
+Skew-view : ∀ {m} → (bs : Skew m) → Skew-View bs
+Skew-view ϵ = is-ϵ
+Skew-view (bs I[ c ]) = is- Skew-view bs I[ c ]
+Skew-view {C} (bs T[ c ]) = is- Skew-view bs T[ c ]
+
+-- Operations:
+
+incr : Skew C → Skew C
+incr ϵ = ϵ I[ 0 ]
+incr (bs I[ 0 ]) = bs T[ 0 ]
+incr (bs I[ sucℕ c ]) = bs I[ c ] I[ 0 ]
+incr (ϵ T[ c ]) = ϵ I[ sucℕ c ]
+incr (bs I[ zero ] T[ c ]) = bs T[ sucℕ c ]
+incr (bs I[ sucℕ c₁ ] T[ c ]) = bs I[ c₁ ] I[ sucℕ c ]
+
+decr : Skew C → Skew C
+decr ϵ = ϵ
+decr (bs T[ zero ]) = bs I[ zero ]
+decr (bs T[ sucℕ c ]) = bs I[ 0 ] T[ c ]
+decr (ϵ I[ zero ]) = ϵ
+decr (bs I[ c ] I[ zero ]) = bs I[ sucℕ c ]
+decr (ϵ I[ sucℕ c ]) = ϵ T[ c ]
+decr (bs I[ c₁ ] I[ sucℕ c ]) = bs I[ sucℕ c₁ ] T[ c ]
+
+-- Correctness:
+
+{-# REWRITE rewrite-+0 rewrite-+S rewrite-+-comm #-}
+
+pf-incr : ∀ s → 1 + (Skew⇒Nat s) ≡ Skew⇒Nat (incr s)
+pf-incr ϵ = refl
+pf-incr (bs I[ zero ]) = refl
+pf-incr (bs I[ sucℕ c ]) = refl
+pf-incr (ϵ T[ c ]) = refl
+pf-incr ((bs I[ zero ]) T[ c ]) = refl
+pf-incr ((bs I[ sucℕ x ]) T[ c ]) = refl
+
+pf-decr : ∀ s → pred (Skew⇒Nat s) ≡ Skew⇒Nat (decr s)
+pf-decr ϵ = refl
+pf-decr (ϵ I[ sucℕ c ]) = refl
+pf-decr ((bs I[ x ]) I[ sucℕ c ]) = refl
+pf-decr (ϵ I[ zero ]) = refl
+pf-decr ((bs I[ c ]) I[ zero ]) = refl
+pf-decr (x T[ zero ]) = refl
+pf-decr (x T[ sucℕ x₁ ]) = refl
+
