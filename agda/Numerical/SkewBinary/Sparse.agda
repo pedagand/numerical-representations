@@ -1,10 +1,11 @@
-open import Data.Nat renaming (suc to sucℕ)
+{-# OPTIONS --allow-unsolved-metas #-}
 
+open import Data.Nat renaming (suc to sucℕ)
 open import Relation.Binary.PropositionalEquality
 
-open import Utils
+open import Numerical.Nat.Properties
 
-module SkewBin.Sparse where
+module Numerical.SkewBinary.Sparse where
 
 data Skew : Set where
   ϵ  : Skew

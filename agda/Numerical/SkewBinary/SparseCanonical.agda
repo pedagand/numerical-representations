@@ -1,14 +1,13 @@
 {-# OPTIONS --rewriting #-}
 
 open import Data.Nat renaming (suc to sucℕ)
-
 open import Relation.Binary.PropositionalEquality
 
-open import Utils
+open import Numerical.Nat.Properties
 
 {-# BUILTIN REWRITE _≡_ #-}
 
-module SkewBin.SparseCanonical where
+module Numerical.SkewBinary.SparseCanonical where
 
     data Mode : Set where
       I C : Mode
