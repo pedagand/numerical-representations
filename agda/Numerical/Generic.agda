@@ -17,26 +17,16 @@ module Generic where
       (nx : ∀ {m} → Fin (op m) → mode)
     where
 
-    Sig : Set → (mode → Set) 
-    Sig A m = Σ[ n ∈ Fin (op m) ] Vec A (suc (ar n))
-
-    map : ∀ {A B} → (A → B) → ∀ {m} → Sig A m → Sig B m
-    map f (n , k) = (n , map-Vec f k)
-
-    sum : ∀ {m} → Sig ℕ m → ℕ
-    sum (_ , k) = sum-Vec k
-
-    data Num (A : Set) : mode → Set where
+    data Num (A : ℕ → Set) : mode → Set where
       ϵ : ∀ {m} → Num A m
-      C : ∀ {m} → (s : Sig A m)(c : ℕ) → Num A (nx (proj₁ s))  → Num A m
-      -- C : ∀ {m} → (n : Fin (op m))(as : Vec A (suc (ar n)))(c : ℕ) → Num A (nx n)  → Num A m
+      C : ∀ {m} → (d : Fin (op m))(as : Vec (A {!!}) (suc (ar d)))(c : ℕ) → Num A (nx d) → Num A m
 
-    val : ∀ {A m} → Sig A m → ℕ → ℕ
-    val x k = sum (map (λ _ → base k) x)
+    val : ∀ {A : Set}{m}{d : Fin (op m)} → Vec A (suc (ar d)) → ℕ → ℕ
+    val as k = Data.Vec.sum (Data.Vec.map (λ _ → base k) as)
 
     toℕ-help : ∀ {A m} → Num A m → ℕ → ℕ
     toℕ-help ϵ k = 0
-    toℕ-help (C s c n) k = val s (k + c) + toℕ-help n (1 + k + c)
+    toℕ-help (C d as c n) k = val as (k + c) + toℕ-help n (1 + k + c)
 
     toℕ : ∀ {A m} → Num A m → ℕ
     toℕ n = toℕ-help n 0
@@ -120,21 +110,21 @@ module Generic where
 
   open Skew
 
-  data Skew-View : ∀ {m} → Num ⊤ m → Set where
+  data Skew-View : ∀ {m} → Num (λ _ → ⊤) m → Set where
     ϵ : ∀ {m} → Skew-View {m} ϵ
-    _I[_] : ∀ {m} (bs : Num ⊤ SkewSig.I)(c : ℕ) →
-            Skew-View {m} (G.C (zero , tt ∷ []) c bs)
-    _T[_] : (bs : Num ⊤ SkewSig.I)(c : ℕ) → 
-            Skew-View {SkewSig.C} (G.C ((suc zero) , tt ∷ tt ∷ []) c bs)
+    _I[_] : ∀ {m} (bs : Num (λ _ → ⊤) SkewSig.I)(c : ℕ) →
+            Skew-View {m} (G.C zero (tt ∷ []) c bs)
+    _T[_] : (bs : Num (λ _ → ⊤) SkewSig.I)(c : ℕ) →
+            Skew-View {SkewSig.C} (G.C (suc zero)  (tt ∷ tt ∷ []) c bs)
 
-  Skew-view : ∀ {m} → (bs : Num ⊤ m) → Skew-View bs 
+  Skew-view : ∀ {m} → (bs : Num (λ _ → ⊤) m) → Skew-View bs
   Skew-view {m} G.ϵ = ϵ
-  Skew-view {m} (G.C (zero , tt ∷ []) c bs) = bs I[ c ]
-  Skew-view {SkewSig.C} (G.C (suc zero , tt ∷ tt ∷ []) c bs) = bs T[ c ]
+  Skew-view {m} (G.C zero (tt ∷ []) c bs) = bs I[ c ]
+  Skew-view {SkewSig.C} (G.C (suc zero) (tt ∷ tt ∷ []) c bs) = bs T[ c ]
 
   
   
-  incr : ∀ {m} → Num ⊤ m → Num ⊤ SkewSig.I
+  incr : ∀ {m} → Num (λ _ → ⊤) m → Num (λ _ → ⊤) SkewSig.I
   incr bs with Skew-view bs
   ... | ϵ = {!!}
   ... | bs I[ c ] = {!!}
