@@ -1,6 +1,8 @@
 open import Data.Nat
 open import Relation.Binary.PropositionalEquality
 
+module Numerical.Unary where
+
 data Nat : Set where
   ϵ  : Nat
   _I : Nat → Nat
