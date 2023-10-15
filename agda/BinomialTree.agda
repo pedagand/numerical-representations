@@ -1,15 +1,11 @@
 {-# OPTIONS --allow-unsolved-metas #-}
 
-open import Data.Unit
 open import Data.Bool
 open import Data.Product
 open import Data.Nat
-open import Data.Vec hiding (insert ; concat)
+open import Data.Maybe
 
-open import Relation.Binary.Core
-open import Relation.Binary.Structures
-open import Relation.Binary.PropositionalEquality hiding ([_])
-open import Relation.Binary.HeterogeneousEquality hiding ([_])
+open import Relation.Binary
 
 {-
 
@@ -33,51 +29,44 @@ in Haskell with nested types
 
 -}
 
-module BinomialTree where
+module BinomialTree (A : Set)
+                    (_≈_ : Rel A Agda.Primitive.lzero)
+                    (_≤_ : Rel A Agda.Primitive.lzero)
+                    (_ : IsTotalOrder _≈_ _≤_) where
 
-  -- Composing 01-binary structure with binomial heaps
+open import Container.Binary.BinomialHeap
+open import Structure.Binary.Dense Tree toVec fromVec iso-to-from iso-from-to
 
-  open import Structure.Bin
-  open import Container.BinomialHeap
-  
-  binomialTree : Set → Set
-  binomialTree A = DBin Container.BinomialHeap.Tree
-                        Container.BinomialHeap.toVec Container.BinomialHeap.fromVec
-                        Container.BinomialHeap.iso-to-from Container.BinomialHeap.iso-from-to A
+BinomialTree : Set → Set
+BinomialTree A = DBin0 A
 
-  -- TODO: implement all the operations on the datastructure:
-  --   cf. "Numerical representation as higher-order nested datatypes", Fig. 5, p.21 for the interface
-  --   cf. Okasaki, [Hinze 1998](https://dl.acm.org/doi/10.1017/S0956796899003317)
+-- TODO: implement all the operations on the datastructure:
+--   cf. "Numerical representation as higher-order nested datatypes", Fig. 5, p.21 for the interface
+--   cf. Okasaki, [Hinze 1998](https://dl.acm.org/doi/10.1017/S0956796899003317)
 
-  module API (A : Set)
-             (_≈_ : Rel A Agda.Primitive.lzero)
-             (_≤_ : Rel A Agda.Primitive.lzero)
-             (_ : IsTotalOrder _≈_ _≤_)
-    where
+empty : BinomialTree A
+empty = {!!}
 
-    empty : binomialTree A
-    empty = {!!}
+splitMin : BinomialTree A → A × BinomialTree A
+splitMin = {!!}
 
-    splitMin : binomialTree A → A × binomialTree A
-    splitMin = {!!}
+splitMax : BinomialTree A → BinomialTree A × A
+splitMax = {!!}
 
-    splitMax : binomialTree A → binomialTree A × A
-    splitMax = {!!}
+member : A → BinomialTree A → Bool
+member = {!!}
 
-    member : A → binomialTree A → Bool
-    member = {!!}
+insert : A → BinomialTree A → BinomialTree A
+insert = {!!}
 
-    insert : A → binomialTree A → binomialTree A
-    insert = {!!}
+delete : A → BinomialTree A → BinomialTree A
+delete = {!!}
 
-    delete : A → binomialTree A → binomialTree A
-    delete = {!!}
+concat : BinomialTree A → BinomialTree A → BinomialTree A
+concat = {!!}
 
-    concat : binomialTree A → binomialTree A → binomialTree A
-    concat = {!!}
+partition : A → BinomialTree A → BinomialTree A × BinomialTree A
+partition = {!!}
 
-    partition : A → binomialTree A → binomialTree A × binomialTree A
-    partition = {!!}
-
-    merge : binomialTree A → binomialTree A → binomialTree A
-    merge = {!!}
+merge : BinomialTree A → BinomialTree A → BinomialTree A
+merge = {!!}
