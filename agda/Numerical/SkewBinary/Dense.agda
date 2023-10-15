@@ -1,26 +1,47 @@
 {-# OPTIONS --allow-unsolved-metas #-}
 
-open import Data.Nat renaming (suc to sucℕ)
+open import Data.Unit
+open import Data.Fin hiding (_+_ ; pred) renaming (suc to sucF)
+open import Data.Nat
 open import Relation.Binary.PropositionalEquality
 
 open import Numerical.Nat.Properties
 
+import Numerical.Generic.Dense
+
 module Numerical.SkewBinary.Dense where
 
-data Skew : Set where
-  ϵ  : Skew
-  _O : Skew → Skew
-  _I : Skew → Skew
-  _T : Skew → Skew
+base : ℕ → ℕ
+base k = 2^[ k +1]-1
 
-Skew⇒Nat-g : Skew → ℕ → ℕ
-Skew⇒Nat-g ϵ k = 0
-Skew⇒Nat-g (bs O) k = {- 0 * 2^[ k +1]-1 + -} Skew⇒Nat-g bs (1 + k)
-Skew⇒Nat-g (bs I) k = {- 1 * -} 2^[ k +1]-1 + Skew⇒Nat-g bs (1 + k)
-Skew⇒Nat-g (bs T) k = {- 2 * 2^[ k +1]-1 = -} 2^[ k +1]-1 + 2^[ k +1]-1 + Skew⇒Nat-g bs (1 + k)
+mode : Set
+mode = ⊤
+
+op : mode → ℕ
+op m = 3
+
+ar : ∀ {m} → Fin (op m) → ℕ
+ar zero = 0
+ar (sucF zero) = 1
+ar (sucF (sucF zero)) = 2
+
+nx : ∀ {m} → Fin (op m) → mode
+nx _ = tt
+
+module SkewBinary = Numerical.Generic.Dense base mode op ar nx
+
+open SkewBinary
+
+Skew = Num tt
 
 Skew⇒Nat : Skew → ℕ
-Skew⇒Nat b = Skew⇒Nat-g b 0
+Skew⇒Nat = SkewBinary.toℕ
+
+Skew⇒Nat-help = toℕ-help
+
+pattern _O bs = C zero bs
+pattern _I bs = C (sucF zero) bs
+pattern _T bs = C (sucF (sucF zero)) bs
 
 _ : Skew⇒Nat (ϵ O) ≡ 0
 _ = refl
@@ -56,31 +77,47 @@ _ : Skew⇒Nat (ϵ I T T) ≡ 15
 _ = refl
 
 
--- XXX: this cannot be implemented in constant-time because
+-- Isomorphism with direct representation:
+
+data Skew-View : Skew → Set where
+  is-ϵ  : Skew-View ϵ
+  is-_O : ∀ {bs} → Skew-View bs → Skew-View (bs O)
+  is-_I : ∀ {bs} → Skew-View bs → Skew-View (bs I)
+  is-_T : ∀ {bs} → Skew-View bs → Skew-View (bs T)
+
+Skew-view : ∀ bs → Skew-View bs
+Skew-view ϵ = is-ϵ
+Skew-view (bs O) = is- Skew-view bs O
+Skew-view (bs I) = is- Skew-view bs I
+Skew-view (bs T) = is- Skew-view bs T
+
+-- Operations:
+
+-- Remark: this cannot be implemented in constant-time because
 --
 --   1. we have Os lying getting in the way (case `n O`)
 --   2. we have carries that could propgate (case `n T T`)
 --
 -- which makes this representation useless for the intended
 -- data-structure
-suc : Skew → Skew
-suc ϵ = ϵ I
-suc (n O) = n I
-suc (n I) = n T
-suc (ϵ T) = {!!}
-suc ((n O) T) = n I O
-suc ((n I) T) = n T O
-suc ((n T) T) = {!!}
+incr : Skew → Skew
+incr ϵ = ϵ I
+incr (n O) = n I
+incr (n I) = n T
+incr (ϵ T) = {!!}
+incr ((n O) T) = n I O
+incr ((n I) T) = n T O
+incr ((n T) T) = {!!}
 
 
-pf-suc-g : ∀ k n → Skew⇒Nat-g (suc n) k ≡ 2^[ k +1]-1 * (sucℕ (Skew⇒Nat-g n k))
-pf-suc-g k ϵ = {!TRUE!}
-pf-suc-g k (n O) = {!TRUE!}
-pf-suc-g k (n I) = {!!}
-pf-suc-g k (ϵ T) = {!!}
-pf-suc-g k ((n O) T) = {!!}
-pf-suc-g k ((n I) T) = {!!}
-pf-suc-g k ((n T) T) = {!!}
+pf-incr-g : ∀ k n → Skew⇒Nat-help (incr n) k ≡ 2^[ k +1]-1 * (suc (Skew⇒Nat-help n k))
+pf-incr-g k ϵ = {!TRUE!}
+pf-incr-g k (n O) = {!TRUE!}
+pf-incr-g k (n I) = {!!}
+pf-incr-g k (ϵ T) = {!!}
+pf-incr-g k ((n O) T) = {!!}
+pf-incr-g k ((n I) T) = {!!}
+pf-incr-g k ((n T) T) = {!!}
 
-pf-suc : ∀ n → Skew⇒Nat (suc n) ≡ sucℕ (Skew⇒Nat n)
-pf-suc n rewrite pf-suc-g 0 n = {!TRUE!}
+pf-incr : ∀ n → Skew⇒Nat (incr n) ≡ suc (Skew⇒Nat n)
+pf-incr n rewrite pf-incr-g 0 n = {!TRUE!}
