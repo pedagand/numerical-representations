@@ -1,44 +1,81 @@
 {-# OPTIONS --allow-unsolved-metas #-}
 
+open import Data.Unit
+open import Data.Fin renaming (suc to sucF) hiding (_+_ ; pred)
 open import Data.Nat
 open import Relation.Binary.PropositionalEquality
 
+import Numerical.Generic.Dense
+
 module Numerical.Binary.Dense where
 
-data Bin : Set where
-  ϵ  : Bin
-  _O : Bin → Bin
-  _I : Bin → Bin
+base : ℕ → ℕ
+base k = 2 ^ k
 
-Bin⇒Nat-g : Bin → ℕ → ℕ
-Bin⇒Nat-g ϵ k = 0
-Bin⇒Nat-g (bs O) k =  0 {- * 2 ^ k + -} + Bin⇒Nat-g bs (1 + k)
-Bin⇒Nat-g (bs I) k = {- 1 * -} 2 ^ k + Bin⇒Nat-g bs (1 + k)
+mode : Set
+mode = ⊤
+
+op : mode → ℕ
+op m = 2
+
+ar : ∀ {m} → Fin (op m) → ℕ
+ar zero = 0
+ar (sucF zero) = 1
+
+nx : ∀ {m} → Fin (op m) → mode
+nx _ = tt
+
+module Binary = Numerical.Generic.Dense base mode op ar nx
+
+open Binary
+
+Bin = Num tt
 
 Bin⇒Nat : Bin → ℕ
-Bin⇒Nat b = Bin⇒Nat-g b 0
+Bin⇒Nat = Binary.toℕ
 
-inc : Bin → Bin
-inc ϵ = ϵ I
-inc (bs O) = bs I
-inc (bs I) = inc bs O
+Bin⇒Nat-help = toℕ-help
 
-pf-inc-g : ∀ bs k → Bin⇒Nat-g (inc bs) k ≡ 2 ^ k + (Bin⇒Nat-g bs k)
-pf-inc-g ϵ k = refl
-pf-inc-g (bs O) k = refl
-pf-inc-g (bs I) k rewrite pf-inc-g bs (suc k) = {!OK!}
+pattern _O bs = C zero bs
+pattern _I bs = C (sucF zero) bs
 
-pf-inc : ∀ bs → Bin⇒Nat (inc bs) ≡ suc (Bin⇒Nat bs)
-pf-inc bs = pf-inc-g bs 0
+-- Isomorphism with direct representation:
 
-dec : Bin → Bin
-dec = {!!}
+data Bin-View : Bin → Set where
+  is-ϵ  : Bin-View ϵ
+  is-_O : ∀ {bs} → Bin-View bs → Bin-View (bs O)
+  is-_I : ∀ {bs} → Bin-View bs → Bin-View (bs I)
 
-pf-dec : ∀ bs → Bin⇒Nat (dec bs) ≡ pred (Bin⇒Nat bs)
-pf-dec bs = {!!}
+Bin-view : ∀ bs → Bin-View bs
+Bin-view ϵ = is-ϵ
+Bin-view (bs O) = is- Bin-view bs O
+Bin-view (bs I) = is- Bin-view bs I
+
+-- Operations:
+
+incr : Bin → Bin
+incr ϵ = ϵ I
+incr (bs O) = bs I
+incr (bs I) = incr bs O
+
+decr : Bin → Bin
+decr = {!!}
 
 add : Bin → Bin → Bin
 add = {!!}
+
+-- Properties:
+
+pf-incr-g : ∀ bs k → Bin⇒Nat-help (incr bs) k ≡ 2 ^ k + (Bin⇒Nat-help bs k)
+pf-incr-g ϵ k = {!!} {- TRUE: refl -}
+pf-incr-g (bs O) k = {!!} {- TRUE: refl -}
+pf-incr-g (bs I) k rewrite pf-incr-g bs (suc k) = {!OK!}
+
+pf-incr : ∀ bs → Bin⇒Nat (incr bs) ≡ suc (Bin⇒Nat bs)
+pf-incr bs = pf-incr-g bs 0
+
+pf-decr : ∀ bs → Bin⇒Nat (decr bs) ≡ pred (Bin⇒Nat bs)
+pf-decr bs = {!!}
 
 pf-add : ∀ bs₁ bs₂ → Bin⇒Nat (add bs₁ bs₂) ≡ (Bin⇒Nat bs₁) + (Bin⇒Nat bs₂)
 pf-add bs₁ bs₂ = {!!}
