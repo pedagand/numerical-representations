@@ -1,14 +1,10 @@
 {-# OPTIONS --allow-unsolved-metas #-}
 
-open import Data.Nat
-open import Data.Unit
-open import Data.Empty
 open import Data.Product
+open import Data.Nat
 open import Data.Maybe
-open import Data.Vec
 
-open import Relation.Binary.PropositionalEquality hiding ([_])
-open import Relation.Binary.HeterogeneousEquality hiding ([_])
+module BinaryRandomAccessList where
 
 {-
 
@@ -30,40 +26,33 @@ in Haskell with nested types:
 
 -}
 
-module BinaryRandomAccessList where
+open import Container.Binary.LeafBinaryTree
+open import Structure.Binary.Dense Tree toVec fromVec iso-to-from iso-from-to
 
-  -- Composing 01-binary structure with leaf binary tree
+RAL : Set → Set
+RAL A = DBin0 A
 
-  open import Structure.Bin
-  open import Container.LeafBinaryTree
+-- TODO: implement all the operations on the datastructure:
+--   cf. "Numerical representation as higher-order nested datatypes", Fig. 3, p.13 for the interface
+--   cf. Okasaki, Sec. 9.2.1 and 10.1.2 for the implementation
 
-  RAL : Set → Set
-  RAL A = DBin Tree
-               Container.LeafBinaryTree.toVec Container.LeafBinaryTree.fromVec
-               Container.LeafBinaryTree.iso-to-from Container.LeafBinaryTree.iso-from-to A
+empty : ∀ {A} → RAL A
+empty = {!!}
 
+cons : ∀ {A} → A → RAL A → RAL A
+cons = {!!}
 
-  -- TODO: implement all the operations on the datastructure:
-  --   cf. "Numerical representation as higher-order nested datatypes", Fig. 3, p.13 for the interface
-  --   cf. Okasaki, Sec. 9.2.1 and 10.1.2 for the implementation
+front : ∀ {A} → RAL A → A × RAL A
+front = {!!}
 
-  empty : ∀ {A} → RAL A
-  empty = {!!}
+snoc : ∀ {A} → RAL A → A → RAL A
+snoc = {!!}
 
-  cons : ∀ {A} → A → RAL A → RAL A
-  cons = {!!}
+rear : ∀ {A} → RAL A → A × RAL A
+rear = {!!}
 
-  front : ∀ {A} → RAL A → A × RAL A
-  front = {!!}
+access : ∀ {A} → RAL A → ℕ → Maybe A
+access = {!!}
 
-  snoc : ∀ {A} → RAL A → A → RAL A
-  snoc = {!!}
-
-  rear : ∀ {A} → RAL A → A × RAL A
-  rear = {!!}
-
-  access : ∀ {A} → RAL A → ℕ → Maybe A
-  access = {!!}
-
-  update : ∀ {A} → RAL A → ℕ → A → RAL A
-  update = {!!}
+update : ∀ {A} → RAL A → ℕ → A → RAL A
+update = {!!}
