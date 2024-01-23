@@ -39,6 +39,30 @@ OneTwo⇒Nat-help = toℕ-help
 pattern _I bs = C zero bs
 pattern _T bs = C (sucF zero) bs
 
+_ : OneTwo⇒Nat ϵ ≡ 0
+_ = refl
+
+_ : OneTwo⇒Nat (ϵ I) ≡ 1
+_ = refl
+
+_ : OneTwo⇒Nat (ϵ T) ≡ 2
+_ = refl
+
+_ : OneTwo⇒Nat (ϵ I I) ≡ 3
+_ = refl
+
+_ : OneTwo⇒Nat (ϵ I T) ≡ 4
+_ = refl
+
+_ : OneTwo⇒Nat (ϵ T I) ≡ 5
+_ = refl
+
+_ : OneTwo⇒Nat (ϵ T T) ≡ 6
+_ = refl
+
+_ : OneTwo⇒Nat (ϵ I I I) ≡ 7
+_ = refl
+
 -- Isomorphism with direct representation:
 
 data OneTwo-View : OneTwo → Set where
