@@ -28,6 +28,7 @@ import Structure.Generic.RunLength
 import Structure.Binary.Dense
 import Structure.Binary.OneTwo
 
--- open import BinaryRandomAccessList
--- open import BinomialTree
--- open import OneTwoRandomAccessList
+-- 4. Full-fledged data-structures
+open import BinaryRandomAccessList
+open import BinomialTree
+open import OneTwoRandomAccessList
